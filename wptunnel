@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+set -o errexit -o pipefail -o noclobber
+
+! getopt --test > /dev/null
+if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
+    echo "I’m sorry, `getopt --test` failed in this environment."
+    exit 1
+fi
+
+OPTIONS=fhv
+LONGOPTS=force-recreate,help,version
+
+! PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@")
+if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
+    # e.g. return value is 1
+    #  then getopt has complained about wrong arguments to stdout
+    exit 2
+fi
+# read getopt’s output this way to handle the quoting right:
+eval set -- "$PARSED"
+
+helptext="
+Usage:  wptunnel [OPTIONS] <COMMAND> <SUBDOMAIN>
+
+Creates and runs a local WordPress installation within Docker container and makes it available at <subdomain>.wptunnel.com
+
+Example:
+
+    $ wptunnel create mysite
+    $ wptunnel run mysite
+
+Options:
+    -h | --help         Show this help text
+    -v | --version      Show script version
+
+Commands:
+    create              Create or overwrite a local WordPress installation
+    run                 Run and expose (proxy) a local WordPress installation to <subdomain>.wptunnel.com
+    eject               Not jet implemented
+
+Subdomain
+    <subdomain>.wptunnel.com
+"
+
+if [[ $PARSED == " --" ]]; then
+    echo "$helptext"
+    exit 0
+fi
+
+while true; do
+    case "$1" in
+        -h|--help)
+            echo "$helptext"
+            exit 0
+            ;;
+        -v|--version)
+            echo $(cat version)
+            exit 0
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Programming error"
+            exit 0
+            ;;
+    esac
+done
+
+assertSubdomain () {
+    r1=$(printf '%s' {a..z} {0..9})
+    r2="[$r1]"
+    r3="[$r1-]"
+    reg="^$r2($r3{0,30}$r2)?$"
+    if [ -z "$1" ]; then
+        echo "Missing subdomain."
+        echo "Run 'wptunnel --help' for more information."
+        exit 1
+    fi
+    if [[ ! "$1" =~ $reg ]]; then
+        echo "Subdomain can only contain [a-z], [0-9] or '-' and must be less than 30 letters."
+        echo "Run 'wptunnel --help' for more information."
+        exit 1
+    fi
+}
+
+assertProject () {
+    if [ ! -f "~/.wptunnel/projects/$1" ]; then
+        echo "Project with the given subdomain doesn't exist."
+        echo -e "You can create it with:\n"
+        echo -e " $ wptunnel create $1\n"
+        echo "Run 'wptunnel --help' for more information."
+        exit 1
+    fi
+}
+
+case "$1" in
+  create)
+    assertSubdomain "$2"
+    SUBDOMAIN="$2"
+    PROJECT_DIR="~/.wptunnel/projects/$2"
+    sh -c "mkdir -p $PROJECT_DIR"
+    PROJECT_DOCKER_COMPOSE="$PROJECT_DIR/docker-compose.yml"
+    sh -c "cp ~/.wptunnel/template/docker-compose.yml $PROJECT_DOCKER_COMPOSE"
+    sed -i "s/{SUBDOMAIN}/${SUBDOMAIN}/g" $PROJECT_DOCKER_COMPOSE
+    ;;
+  run)
+    echo "$2"
+    assertSubdomain "$2"
+    assertProject "$2"
+    docker-compose -f ~/.wptunnel/projects/$2 start
+    ;;
+  eject)
+    echo "Not jet implemented."
+    ;;
+  *)
+    echo "Unknown command: $1"
+    echo "$helptext"
+    ;;
+esac

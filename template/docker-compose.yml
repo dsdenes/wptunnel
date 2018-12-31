@@ -1,0 +1,51 @@
+version: '3.7'
+
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - /var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: somewordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+  wordpress:
+    depends_on:
+      - db
+    build: ../docker/wordpress
+    ports:
+      - "80:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WP_URL: http://${SUBDOMAIN}.1p.hu
+    healthcheck:
+      test: |
+          curl --silent --fail http://wordpress:80/wp-admin/install.php ||
+          curl --silent --fail http://wordpress:80/index.php ||
+          exit 1
+      interval: 10s
+      timeout: 2s
+      retries: 3
+  wordpress-finalize:
+    depends_on:
+      - wordpress
+    build: ../docker/wordpress-finalize
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - 81:80
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: wordpress
+  frp:
+    depends_on:
+      - wordpress
+    build: ../docker/frp-docker
