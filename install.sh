@@ -100,7 +100,7 @@ echo -e "${GREEN}Dependencies are OK${NOCOLOR}"
 
 mkdir -p ~/.wptunnel
 downloadTo "https://github.com/dsdenes/wptunnel/archive/v0.0.1.tar.gz" "~/.wptunnel/wptunnel.tar.gz"
-tar -xzf ./wptunnel.tar.gz --strip 1 ~/.wptunnel
+tar -xzf ~/.wptunnel/wptunnel.tar.gz --strip 1 ~/.wptunnel
 chmod +x ~/.wptunnel/bin/wptunnel
 rm -rf ~/.wptunnel/wptunnel.tar.gz
 
