@@ -98,7 +98,7 @@ case "$1" in
     SUBDOMAIN="$2"
     PROJECT_DIR="$HOME/.wptunnel/projects/$2"
     sh -c "mkdir -p $PROJECT_DIR"
-    sh -c "cp -R $HOME/.wptunnel/frp-docker $PROJECT_DIR"
+    sh -c "cp -R $HOME/.wptunnel/docker/frp-docker $PROJECT_DIR"
 
     PROJECT_DOCKER_COMPOSE="$PROJECT_DIR/docker-compose.yml"
     sh -c "cp ~/.wptunnel/template/docker-compose.yml $PROJECT_DOCKER_COMPOSE"
