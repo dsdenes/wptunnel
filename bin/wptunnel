@@ -7,16 +7,13 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     exit 1
 fi
 
-OPTIONS=fhv
-LONGOPTS=force-recreate,help,version
+OPTIONS=hv
+LONGOPTS=help,version
 
 ! PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@")
 if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
-    # e.g. return value is 1
-    #  then getopt has complained about wrong arguments to stdout
     exit 2
 fi
-# read getopt’s output this way to handle the quoting right:
 eval set -- "$PARSED"
 
 helptext="
@@ -68,7 +65,7 @@ while true; do
     esac
 done
 
-assertSubdomain () {
+assert_subdomain () {
     r1=$(printf '%s' {a..z} {0..9})
     r2="[$r1]"
     r3="[$r1-]"
@@ -85,7 +82,7 @@ assertSubdomain () {
     fi
 }
 
-assertProject () {
+assert_project () {
     if [ ! -f "~/.wptunnel/projects/$1" ]; then
         echo "Project with the given subdomain doesn't exist."
         echo -e "You can create it with:\n"
@@ -97,18 +94,18 @@ assertProject () {
 
 case "$1" in
   create)
-    assertSubdomain "$2"
+    assert_subdomain "$2"
     SUBDOMAIN="$2"
     PROJECT_DIR="~/.wptunnel/projects/$2"
     sh -c "mkdir -p $PROJECT_DIR"
     PROJECT_DOCKER_COMPOSE="$PROJECT_DIR/docker-compose.yml"
     sh -c "cp ~/.wptunnel/template/docker-compose.yml $PROJECT_DOCKER_COMPOSE"
-    sed -i "s/{SUBDOMAIN}/${SUBDOMAIN}/g" $PROJECT_DOCKER_COMPOSE
+    sh -c "sed -i \"s/{SUBDOMAIN}/${SUBDOMAIN}/g\" $PROJECT_DOCKER_COMPOSE"
     ;;
   run)
     echo "$2"
-    assertSubdomain "$2"
-    assertProject "$2"
+    assert_subdomain "$2"
+    assert_project "$2"
     docker-compose -f ~/.wptunnel/projects/$2 start
     ;;
   eject)
