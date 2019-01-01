@@ -96,12 +96,11 @@ ensureDockerCompose () {
 
 ensureDocker
 ensureDockerCompose
-echo -e "${GREEN}Dependencies are OK${NOCOLOR}"
 
 mkdir -p ~/.wptunnel
-downloadTo "https://github.com/dsdenes/wptunnel/archive/v0.0.1.tar.gz" "~/.wptunnel/wptunnel.tar.gz"
-tar -xzf ~/.wptunnel/wptunnel.tar.gz --strip 1 -C ~/.wptunnel
+downloadTo "https://github.com/dsdenes/wptunnel/archive/v0.0.1.tar.gz" "/tmp/wptunnel.tar.gz"
+tar -xzf /tmp/wptunnel.tar.gz --strip 1 -C ~/.wptunnel
 chmod +x ~/.wptunnel/bin/wptunnel
-rm -rf ~/.wptunnel/wptunnel.tar.gz
+rm -rf /tmp/wptunnel.tar.gz
 
 echo -e "${GREEN}All done.${NOCOLOR}"
