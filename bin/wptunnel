@@ -98,14 +98,19 @@ case "$1" in
     SUBDOMAIN="$2"
     PROJECT_DIR="$HOME/.wptunnel/projects/$2"
     sh -c "mkdir -p $PROJECT_DIR"
+    sh -c "cp -R $HOME/.wptunnel/frp-docker $PROJECT_DIR"
+
     PROJECT_DOCKER_COMPOSE="$PROJECT_DIR/docker-compose.yml"
     sh -c "cp ~/.wptunnel/template/docker-compose.yml $PROJECT_DOCKER_COMPOSE"
     sh -c "sed -i \"s/{SUBDOMAIN}/${SUBDOMAIN}/g\" $PROJECT_DOCKER_COMPOSE"
+
+    PROJECT_FRPC_INI="$PROJECT_DIR/frp-docker/frpc.ini"
+    sh -c "sed -i \"s/{SUBDOMAIN}/${SUBDOMAIN}/g\" $PROJECT_FRPC_INI"
     ;;
   run)
     assert_subdomain "$2"
     assert_project "$2"
-    sh -c "docker-compose --project-directory ~/.wptunnel/projects/$2 start"
+    sh -c "docker-compose -f ~/.wptunnel/projects/$2/docker-compose.yml up"
     ;;
   eject)
     echo "Not yet implemented."

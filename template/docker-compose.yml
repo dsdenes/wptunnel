@@ -48,4 +48,4 @@ services:
   frp:
     depends_on:
       - wordpress
-    build: ../../docker/frp-docker
+    build: ./frp-docker
