@@ -83,7 +83,7 @@ assert_subdomain () {
 }
 
 assert_project () {
-    if [ ! -f "~/.wptunnel/projects/$1" ]; then
+    if [ ! -d "$HOME/.wptunnel/projects/$1" ]; then
         echo "Project with the given subdomain doesn't exist."
         echo -e "You can create it with:\n"
         echo -e " $ wptunnel create $1\n"
@@ -96,20 +96,19 @@ case "$1" in
   create)
     assert_subdomain "$2"
     SUBDOMAIN="$2"
-    PROJECT_DIR="~/.wptunnel/projects/$2"
+    PROJECT_DIR="$HOME/.wptunnel/projects/$2"
     sh -c "mkdir -p $PROJECT_DIR"
     PROJECT_DOCKER_COMPOSE="$PROJECT_DIR/docker-compose.yml"
     sh -c "cp ~/.wptunnel/template/docker-compose.yml $PROJECT_DOCKER_COMPOSE"
     sh -c "sed -i \"s/{SUBDOMAIN}/${SUBDOMAIN}/g\" $PROJECT_DOCKER_COMPOSE"
     ;;
   run)
-    echo "$2"
     assert_subdomain "$2"
     assert_project "$2"
-    docker-compose -f ~/.wptunnel/projects/$2 start
+    sh -c "docker-compose --project-directory ~/.wptunnel/projects/$2 start"
     ;;
   eject)
-    echo "Not jet implemented."
+    echo "Not yet implemented."
     ;;
   *)
     echo "Unknown command: $1"

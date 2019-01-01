@@ -2,11 +2,15 @@
 INSTALL_URL="http://wordpress:80/wp-admin/install.php?step=2"
 
 isInstallPageLive() {
-    curl --output /dev/null --silent --head --fail http://wordpress:80/wp-admin/install.php
+    curl -L --output /dev/null --silent --head --fail http://wordpress:80/wp-admin/install.php
+}
+
+isInstalled() {
+    curl -L --silent --fail http://wordpress:80/wp-admin/install.php | grep Already
 }
 
 isIndexPageLive() {
-    curl --output /dev/null --silent --head --fail http://wordpress:80/index.php
+    curl -L --output /dev/null --silent --head --fail http://wordpress:80/index.php
 }
 
 while ! (( isIndexPageLive || isInstallPageLive )); do
@@ -14,7 +18,7 @@ while ! (( isIndexPageLive || isInstallPageLive )); do
     sleep 1
 done
 
-if isInstallPageLive; then
+if ! isInstalled; then
     curl --insecure \
         --data-urlencode weblog_title=WPTunnel \
         --data-urlencode user_name=admin \

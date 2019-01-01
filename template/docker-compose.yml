@@ -14,7 +14,7 @@ services:
   wordpress:
     depends_on:
       - db
-    build: ../docker/wordpress
+    build: ../../docker/wordpress
     ports:
       - "80:80"
     restart: always
@@ -22,7 +22,7 @@ services:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
-      WP_URL: http://{SUBDOMAIN}.1p.hu
+      WP_URL: http://{SUBDOMAIN}.wptunnel.com
     healthcheck:
       test: |
           curl --silent --fail http://wordpress:80/wp-admin/install.php ||
@@ -34,7 +34,7 @@ services:
   wordpress-finalize:
     depends_on:
       - wordpress
-    build: ../docker/wordpress-finalize
+    build: ../../docker/wordpress-finalize
   phpmyadmin:
     depends_on:
       - db
@@ -48,4 +48,4 @@ services:
   frp:
     depends_on:
       - wordpress
-    build: ../docker/frp-docker
+    build: ../../docker/frp-docker

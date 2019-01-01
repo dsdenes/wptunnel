@@ -211,7 +211,9 @@ EOPHP
 		set_config 'DB_CHARSET' "$WORDPRESS_DB_CHARSET"
 		set_config 'DB_COLLATE' "$WORDPRESS_DB_COLLATE"
 
+		sed -i /WP_SITEURL/d wp-config.php
 		echo "define('WP_SITEURL', '');" >> wp-config.php
+		sed -i /WP_HOME/d wp-config.php
 		echo "define('WP_HOME', '');" >> wp-config.php
 
 		set_config 'WP_SITEURL' "${WP_URL}"
@@ -286,7 +288,5 @@ EOPHP
 		unset "$e"
 	done
 fi
-
-cat wp-config.php
 
 exec "$@"
