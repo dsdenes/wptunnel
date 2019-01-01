@@ -98,7 +98,7 @@ ensureDocker
 ensureDockerCompose
 
 mkdir -p ~/.wptunnel
-WPTUNNEL_VERSION=`git ls-remote https://github.com/dsdenes/wptunnel | grep refs/tags | grep -oP "[0-9]+\.[0-9]+\.[0-9]+$" | tail -n 1`
+WPTUNNEL_VERSION=`git ls-remote https://github.com/dsdenes/wptunnel | grep refs/tags | grep -oP "[0-9]+\.[0-9]+\.[0-9]+$" | head -n 1`
 downloadTo "https://github.com/dsdenes/wptunnel/archive/${WPTUNNEL_VERSION}.tar.gz" "/tmp/wptunnel.tar.gz"
 tar -xzf /tmp/wptunnel.tar.gz --strip 1 -C ~/.wptunnel
 chmod +x ~/.wptunnel/bin/wptunnel
