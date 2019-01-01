@@ -105,7 +105,7 @@ chmod +x ~/.wptunnel/bin/wptunnel
 rm -rf /tmp/wptunnel.tar.gz
 
 cp ~/.bashrc{,.bak}
-sed "/wptunnel/d" ~/.bashrc
-echo "export PATH=\$PATH:$HOME/.wptunnel/bin" > ~/.bashrc
+sed -i "/wptunnel/d" ~/.bashrc
+echo "export PATH=\$PATH:$HOME/.wptunnel/bin" >> ~/.bashrc
 
 echo -e "${GREEN}All done.${NOCOLOR}"
