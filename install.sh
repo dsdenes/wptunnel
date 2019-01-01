@@ -84,7 +84,6 @@ ensureDockerCompose () {
     echo -e "${YELLOW}NOT FOUND${NOCOLOR}"
     echo -e "${YELLOW}We're going to need sudo access in order to install Docker Compose.${NOCOLOR}"
     sudo true
-    ensureGit
     COMPOSE_VERSION=`git ls-remote https://github.com/docker/compose | grep refs/tags | grep -oP "[0-9]+\.[0-9][0-9]+\.[0-9]+$" | tail -n 1`
     downloadToSudo "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m`" "/usr/local/bin/docker-compose"
     sudo chmod +x /usr/local/bin/docker-compose
@@ -94,11 +93,13 @@ ensureDockerCompose () {
   fi
 }
 
+ensureGit
 ensureDocker
 ensureDockerCompose
 
 mkdir -p ~/.wptunnel
-downloadTo "https://github.com/dsdenes/wptunnel/archive/v0.0.1.tar.gz" "/tmp/wptunnel.tar.gz"
+WPTUNNEL_VERSION=`git ls-remote https://github.com/dsdenes/wptunnel | grep refs/tags | grep -oP "[0-9]+\.[0-9][0-9]+\.[0-9]+$" | tail -n 1`
+downloadTo "https://github.com/dsdenes/wptunnel/archive/${WPTUNNEL_VERSION}.tar.gz" "/tmp/wptunnel.tar.gz"
 tar -xzf /tmp/wptunnel.tar.gz --strip 1 -C ~/.wptunnel
 chmod +x ~/.wptunnel/bin/wptunnel
 rm -rf /tmp/wptunnel.tar.gz
