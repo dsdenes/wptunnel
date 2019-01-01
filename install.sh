@@ -34,25 +34,25 @@ installViaPackageManager () {
 
 downloadExec () {
   if [ -x "$(command -v curl)" ]; then
-    curl ${1} | sh
+    sh -c "curl -sL $1 | sh"
   elif [ -x "$(command -v wget)" ]; then
-    wget -qO- ${1} | sh
+    sh -c "wget -qO- $1 | sh"
   fi
 }
 
 downloadToSudo () {
   if [ -x "$(command -v curl)" ]; then
-    sudo curl -L ${1} > ${2}
+    sudo sh -c "curl -sL $1 > $2"
   elif [ -x "$(command -v wget)" ]; then
-    sudo wget -qO- ${1} > ${2}
+    sudo sh -c "wget -qO- $1 > $2"
   fi
 }
 
 downloadTo () {
   if [ -x "$(command -v curl)" ]; then
-    curl -L ${1} > ${2}
+    sh -c "curl -sL $1 > $2"
   elif [ -x "$(command -v wget)" ]; then
-    wget -qO- ${1} > ${2}
+    sh -c "wget -qO- $1 > $2"
   fi
 }
 
