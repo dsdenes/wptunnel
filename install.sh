@@ -11,7 +11,7 @@ echo -e "===================="
 trap ctrl_c INT
 
 ctrl_c() {
-  error "Failed to ensure dependencies."
+  error "Failed to install."
 }
 
 error () {
