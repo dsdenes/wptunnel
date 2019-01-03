@@ -97,12 +97,15 @@ case "$1" in
     assert_subdomain "$2"
     SUBDOMAIN="$2"
     PROJECT_DIR="$HOME/.wptunnel/projects/$2"
+    PROJECT_DATA_DIR="$HOME/wptunnel/projects/$2"
     sh -c "mkdir -p $PROJECT_DIR"
+    sh -c "mkdir -p $PROJECT_DATA_DIR"
     sh -c "cp -R $HOME/.wptunnel/docker/frp-docker $PROJECT_DIR"
 
     PROJECT_DOCKER_COMPOSE="$PROJECT_DIR/docker-compose.yml"
     sh -c "cp ~/.wptunnel/template/docker-compose.yml $PROJECT_DOCKER_COMPOSE"
     sh -c "sed -i \"s/{SUBDOMAIN}/${SUBDOMAIN}/g\" $PROJECT_DOCKER_COMPOSE"
+    sh -c "sed -i \"s/{DATA_DIR}/${PROJECT_DATA_DIR}/g\" $PROJECT_DOCKER_COMPOSE"
 
     PROJECT_FRPC_INI="$PROJECT_DIR/frp-docker/frpc.ini"
     sh -c "sed -i \"s/{SUBDOMAIN}/${SUBDOMAIN}/g\" $PROJECT_FRPC_INI"

@@ -18,6 +18,8 @@ services:
     ports:
       - "80:80"
     restart: always
+    volumes:
+      - {DATA_DIR}:/var/www/html:rw
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: wordpress
