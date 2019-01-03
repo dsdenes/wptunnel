@@ -51,7 +51,7 @@ while true; do
             exit 0
             ;;
         -v|--version)
-            echo $(cat version)
+            echo $(cat ../version)
             exit 0
             ;;
         --)
