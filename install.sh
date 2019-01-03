@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -e
+
 GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
 RED='\033[1;31m'
@@ -12,6 +14,14 @@ trap ctrl_c INT
 
 ctrl_c() {
   errorInstall
+}
+
+trap "handle_exit_code" EXIT
+
+handle_exit_code() {
+  ERROR_CODE="$?";
+  echo -e "${RED}Failed to install.${NOCOLOR}"
+  exit ${ERROR_CODE};
 }
 
 error () {
@@ -36,7 +46,6 @@ installViaPackageManager () {
       error "Cannot find package manager."
     fi
   fi
-  if [ $? -ne 0 ]; then errorInstall; fi
 }
 
 downloadExec () {
@@ -45,7 +54,6 @@ downloadExec () {
   elif [ -x "$(command -v wget)" ]; then
     sh -c "wget -qO- $1 | sh"
   fi
-  if [ $? -ne 0 ]; then errorInstall; fi
 }
 
 downloadToSudo () {
@@ -54,7 +62,6 @@ downloadToSudo () {
   elif [ -x "$(command -v wget)" ]; then
     sudo sh -c "wget -qO- $1 > $2"
   fi
-  if [ $? -ne 0 ]; then errorInstall; fi
 }
 
 downloadTo () {
@@ -63,7 +70,6 @@ downloadTo () {
   elif [ -x "$(command -v wget)" ]; then
     sh -c "wget -qO- $1 > $2"
   fi
-  if [ $? -ne 0 ]; then errorInstall; fi
 }
 
 ensureHomebrew () {
@@ -71,7 +77,6 @@ ensureHomebrew () {
   if ! [ -x "$(command -v brew)" ]; then
     echo -e "${YELLOW}NOT FOUND${NOCOLOR}"
     /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    if [ $? -ne 0 ]; then errorInstall; fi
   else
     echo -e "${GREEN}OK${NOCOLOR}"
   fi
@@ -114,7 +119,6 @@ ensureDockerCompose () {
     else
       echo -e "${YELLOW}We're going to need sudo access in order to install Docker Compose.${NOCOLOR}"
       sudo true
-      if [ $? -ne 0 ]; then errorInstall; fi
       COMPOSE_VERSION=`git ls-remote https://github.com/docker/compose | grep refs/tags | grep -oP "[0-9]+\.[0-9][0-9]+\.[0-9]+$" | tail -n 1`
       downloadToSudo "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m`" "/usr/local/bin/docker-compose"
       sudo chmod +x /usr/local/bin/docker-compose
@@ -138,7 +142,6 @@ else
 fi
 downloadTo "https://github.com/dsdenes/wptunnel/archive/${WPTUNNEL_VERSION}.tar.gz" "/tmp/wptunnel.tar.gz"
 tar -xzf /tmp/wptunnel.tar.gz --strip 1 -C ~/.wptunnel
-if [ $? -ne 0 ]; then errorInstall; fi
 chmod +x ~/.wptunnel/bin/wptunnel
 rm -rf /tmp/wptunnel.tar.gz
 
@@ -151,3 +154,5 @@ echo "export PATH=\$PATH:$HOME/.wptunnel/bin" >> ~/.bash_profile
 source ~/.bash_profile
 
 echo -e "${GREEN}All done.${NOCOLOR}"
+printf -- '\n'
+exit 0
