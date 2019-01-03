@@ -3,11 +3,10 @@ GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
 RED='\033[1;31m'
 NOCOLOR='\033[0m'
-VERSION=`cat version`
 
-echo -e "=================================="
-echo -e "| Install WPTunnel ${VERSION}     "
-echo -e "=================================="
+echo -e "===================="
+echo -e "| Install WPTunnel |"
+echo -e "===================="
 
 trap ctrl_c INT
 
