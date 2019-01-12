@@ -38,7 +38,8 @@ Options:
 Commands:
     create              Create or overwrite a local WordPress installation
     run                 Run and expose (proxy) a local WordPress installation to <subdomain>.wptunnel.com
-    eject               Not jet implemented
+    stop                Stop a running WordPress installation
+    list                List local WordPress installations
 
 Subdomain
     <subdomain>.wptunnel.com
@@ -97,43 +98,72 @@ assert_project () {
     fi
 }
 
+is_running () {
+    sh -c "docker-compose -f ~/.wptunnel/projects/${1}/docker-compose.yml top | grep wptunnel_wordpress_${2} > /dev/null"
+}
+
+api_project_exists () {
+    response_code=$(curl --write-out %{http_code} --silent --head --output /dev/null https://api.wptunnel.com/projects/${2})
+    if [ response_code == "200" ]; then
+        exit 0
+    else
+        exit 1
+    fi
+}
+
 case "$1" in
   create)
-    assert_subdomain "$2"
     SUBDOMAIN="$2"
-    PROJECT_DIR="$HOME/.wptunnel/projects/$2"
-    PROJECT_DATA_DIR="$HOME/wptunnel/projects/$2"
-    sh -c "mkdir -p $PROJECT_DIR"
-    sh -c "mkdir -p $PROJECT_DATA_DIR"
-    sh -c "cp -R $HOME/.wptunnel/docker/frp-docker $PROJECT_DIR"
+    assert_subdomain ${SUBDOMAIN}
+    PROJECT_DIR="${HOME}/.wptunnel/projects/${SUBDOMAIN}"
+    PROJECT_DATA_DIR="${HOME}/wptunnel/projects/${SUBDOMAIN}"
+    mkdir -p ${PROJECT_DIR}
+    mkdir -p ${PROJECT_DATA_DIR}
+    cp -r ${HOME}/.wptunnel/docker/frp-docker ${PROJECT_DIR}
 
-    PROJECT_DOCKER_COMPOSE="$PROJECT_DIR/docker-compose.yml"
-    sh -c "cp ~/.wptunnel/template/docker-compose.yml $PROJECT_DOCKER_COMPOSE"
-    # echo "sed -i \"s/{SUBDOMAIN}/${SUBDOMAIN}/g\" $PROJECT_DOCKER_COMPOSE"
-    sh -c "sed -i \"s/{SUBDOMAIN}/${SUBDOMAIN}/g\" $PROJECT_DOCKER_COMPOSE"
-    # echo "sed -i \"s|{DATA_DIR}|${PROJECT_DATA_DIR}|g\" $PROJECT_DOCKER_COMPOSE"
-    sh -c "sed -i \"s|{DATA_DIR}|${PROJECT_DATA_DIR}|g\" $PROJECT_DOCKER_COMPOSE"
+    PROJECT_DOCKER_COMPOSE="${PROJECT_DIR}/docker-compose.yml"
+    cp ~/.wptunnel/template/docker-compose.yml ${PROJECT_DOCKER_COMPOSE}
+    sed -i "s/{SUBDOMAIN}/${SUBDOMAIN}/g" ${PROJECT_DOCKER_COMPOSE}
+    sed -i "s|{DATA_DIR}|${PROJECT_DATA_DIR}|g" ${PROJECT_DOCKER_COMPOSE}
 
-    PROJECT_FRPC_INI="$PROJECT_DIR/frp-docker/frpc.ini"
-    sh -c "sed -i \"s/{SUBDOMAIN}/${SUBDOMAIN}/g\" $PROJECT_FRPC_INI"
+    PROJECT_FRPC_INI="${PROJECT_DIR}/frp-docker/frpc.ini"
+    sed -i "s/{SUBDOMAIN}/${SUBDOMAIN}/g" ${PROJECT_FRPC_INI}
     ;;
   run)
     assert_subdomain "$2"
     assert_project "$2"
-    if sh -c "docker-compose -f ~/.wptunnel/projects/${2}/docker-compose.yml top | grep ${2} > /dev/null"; then
-        echo "Already running."
-        exit 1
-    fi
+
     PROJECT_DIR="${HOME}/.wptunnel/projects/$2"
     PROJECT_LOG_DIR="${PROJECT_DIR}/log"
     PROJECT_LOG_FILE="${PROJECT_LOG_DIR}/docker-container.log"
-    sh -c "mkdir -p ${PROJECT_LOG_DIR}"
-    sh -c "docker-compose -f ~/.wptunnel/projects/${2}/docker-compose.yml up > ${PROJECT_LOG_FILE} 2>&1 &"
-    echo -n "Starting... "
-    while ! $(grep -P "wordpress-finalize.+exited with code 0" ${PROJECT_LOG_FILE} > /dev/null); do
+    mkdir -p ${PROJECT_LOG_DIR}
+    sh -c "docker-compose -f ~/.wptunnel/projects/${2}/docker-compose.yml up -d"
+    sh -c "docker-compose -f ~/.wptunnel/projects/${2}/docker-compose.yml logs -f > ${PROJECT_LOG_FILE} 2>&1 &"
+    LOGGER_PID=$!
+    echo -n "Waiting setup script to finish... "
+    while ! $(grep -P "wptunnel_setup.+exited with code 0" ${PROJECT_LOG_FILE} > /dev/null); do
         sleep 0.5
     done
-    echo -e "${GREEN}RUNNING${NOCOLOR}"
+    echo -e "${GREEN}OK${NOCOLOR}"
+    kill -9 LOGGER_PID > /dev/null 2>&1
+    ;;
+  stop)
+    assert_subdomain "$2"
+    assert_project "$2"
+    PROJECT_DIR="${HOME}/.wptunnel/projects/$2"
+    PROJECT_LOG_DIR="${PROJECT_DIR}/log"
+    PROJECT_LOG_FILE="${PROJECT_LOG_DIR}/docker-container.log"
+    mkdir -p ${PROJECT_LOG_DIR}
+
+    echo -n "Stopping (it can take up to 30 seconds)...  "
+    sh -c "docker-compose -f ~/.wptunnel/projects/${2}/docker-compose.yml down > ${PROJECT_LOG_FILE} 2>&1"
+
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}ERROR${NOCOLOR}"
+        echo "See more at ${PROJECT_LOG_FILE}"
+    else
+        echo -e "${GREEN}STOPPED${NOCOLOR}"
+    fi
     ;;
   eject)
     echo "Not yet implemented."
