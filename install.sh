@@ -146,7 +146,7 @@ chmod +x ~/.wptunnel/bin/wptunnel
 rm -rf /tmp/wptunnel.tar.gz
 
 if [ -f ~/.bash_profile ]; then 
-  cp ~/.bash_profile ~/.bash_profile_$(ls ~/.bash_profile*.bak | wc -l).bak
+  cp ~/.bash_profile ~/.bash_profile_$(ls ~/.bash_profile*.bak 2>/dev/null | wc -l).bak
   sed -i /wptunnel/d ~/.bash_profile
 fi
 
