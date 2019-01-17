@@ -20,7 +20,12 @@ trap "handle_exit_code" EXIT
 
 handle_exit_code() {
   ERROR_CODE="$?";
-  echo -e "${RED}Failed to install.${NOCOLOR}"
+  if [ $ERROR_CODE -ne "0" ]; then
+    echo -e "${RED}Failed to install.${NOCOLOR}"
+  else  
+    echo -e "${GREEN}All done.${NOCOLOR}"
+  fi
+  
   exit ${ERROR_CODE};
 }
 
@@ -153,6 +158,5 @@ fi
 echo "export PATH=\$PATH:$HOME/.wptunnel/bin" >> ~/.bash_profile
 source ~/.bash_profile
 
-echo -e "${GREEN}All done.${NOCOLOR}"
 printf -- '\n'
 exit 0
