@@ -39,7 +39,6 @@ Commands:
     create              Create or overwrite a local WordPress installation
     run                 Run and expose (proxy) a local WordPress installation to <subdomain>.wptunnel.com
     stop                Stop a running WordPress installation
-    list                List local WordPress installations
 
 Subdomain
     <subdomain>.wptunnel.com
@@ -99,15 +98,15 @@ assert_project () {
 }
 
 is_running () {
-    sh -c "docker-compose -f ~/.wptunnel/projects/${1}/docker-compose.yml top | grep wptunnel_wordpress_${2} > /dev/null"
+    sh -c "docker-compose -f ~/.wptunnel/projects/${1}/docker-compose.yml top | grep wptunnel_wordpress_${1} > /dev/null"
 }
 
 api_project_exists () {
-    response_code=$(curl --write-out %{http_code} --silent --head --output /dev/null https://api.wptunnel.com/projects/${2})
-    if [ response_code == "200" ]; then
-        exit 0
+    response_code=$(curl --write-out %{http_code} --silent --head --output /dev/null https://api.wptunnel.com/projects/${1})
+    if [ $response_code == "200" ]; then
+        return 0
     else
-        exit 1
+        return 1
     fi
 }
 
@@ -116,6 +115,7 @@ case "$1" in
     SUBDOMAIN="$2"
     PROXY_NAME="$(tr -dc '[:alnum:]' < /dev/urandom  | dd bs=4 count=8 2>/dev/null)" || true
     assert_subdomain ${SUBDOMAIN}
+    echo -n "Creating local WordPress installation ${SUBDOMAIN} ... "
     PROJECT_DIR="${HOME}/.wptunnel/projects/${SUBDOMAIN}"
     PROJECT_DATA_DIR="${HOME}/wptunnel/projects/${SUBDOMAIN}"
     mkdir -p ${PROJECT_DIR}
@@ -130,41 +130,64 @@ case "$1" in
     PROJECT_FRPC_INI="${PROJECT_DIR}/frp-docker/frpc.ini"
     sed -i "s/{SUBDOMAIN}/${SUBDOMAIN}/g" ${PROJECT_FRPC_INI}
     sed -i "s/{PROXY_NAME}/${PROXY_NAME}/g" ${PROJECT_FRPC_INI}
+    echo -e "${GREEN}done${NOCOLOR}"
+    echo -e "\nYou can now run the project with:\n\n  $ wptunnel run ${SUBDOMAIN}\n"
     ;;
   run)
-    assert_subdomain "$2"
-    assert_project "$2"
+    SUBDOMAIN="$2"
+    assert_subdomain ${SUBDOMAIN}
+    assert_project ${SUBDOMAIN}
+
+    if is_running ${SUBDOMAIN}; then
+        echo -e "This local WordPress installation is already running on your machine and proxied to:\n"
+        echo -e " https://${SUBDOMAIN}.wptunnel.com\n"
+        echo -e "You can stop it anytime with:\n"
+        echo -e " $ wptunnel stop ${SUBDOMAIN}\n"
+        exit 0
+    fi
+
+    if api_project_exists ${SUBDOMAIN}; then
+        echo -e "${RED}There is an other project running at https://${SUBDOMAIN}.wptunnel.com${NOCOLOR}\n"
+        exit 1
+    fi
 
     PROJECT_DIR="${HOME}/.wptunnel/projects/$2"
     PROJECT_LOG_DIR="${PROJECT_DIR}/log"
-    PROJECT_LOG_FILE="${PROJECT_LOG_DIR}/docker-container.log"
+    PROJECT_LOG_FILE="${PROJECT_LOG_DIR}/docker-container"
+    PROJECT_LOG_FILE="${PROJECT_LOG_FILE}_$(ls ${PROJECT_LOG_FILE}* | wc -l).log"
     mkdir -p ${PROJECT_LOG_DIR}
-    sh -c "docker-compose -f ~/.wptunnel/projects/${2}/docker-compose.yml up -d"
-    sh -c "docker-compose -f ~/.wptunnel/projects/${2}/docker-compose.yml logs -f > ${PROJECT_LOG_FILE} 2>&1 &"
-    LOGGER_PID=$!
-    echo -n "Waiting setup script to finish... "
+    echo -n "Starting local WordPress installation proxy ... "
+    sh -c "docker-compose -f ~/.wptunnel/projects/${SUBDOMAIN}/docker-compose.yml up -d > /dev/null 2>&1"
+    sh -c "docker-compose -f ~/.wptunnel/projects/${SUBDOMAIN}/docker-compose.yml logs -f > ${PROJECT_LOG_FILE} 2>&1 &"
+    echo -e "${GREEN}done${NOCOLOR}"
+    echo -n "Waiting for setup script to finish (it can take up to 30 seconds) ... "
     while ! $(grep -P "wptunnel_setup.+exited with code 0" ${PROJECT_LOG_FILE} > /dev/null); do
         sleep 0.5
     done
-    echo -e "${GREEN}OK${NOCOLOR}"
-    kill -9 LOGGER_PID > /dev/null 2>&1
+    ps uax | grep -P "[d]ocker-compose.*/projects/${SUBDOMAIN}" | awk '{print $2}' | xargs kill -9
+    echo -e "${GREEN}done${NOCOLOR}\n"
+    echo -e "Your local WordPress installation is proxied to:\n"
+    echo -e " https://${SUBDOMAIN}.wptunnel.com\n"
+    echo -e " Admin username: admin"
+    echo -e " Admin password: admin\n"
+    browser=$(which xdg-open || which gnome-open) && exec "$browser" "https://${SUBDOMAIN}.wptunnel.com" > /dev/null 2>&1
     ;;
   stop)
     assert_subdomain "$2"
     assert_project "$2"
-    PROJECT_DIR="${HOME}/.wptunnel/projects/$2"
+    PROJECT_DIR="${HOME}/.wptunnel/projects/$2"g
     PROJECT_LOG_DIR="${PROJECT_DIR}/log"
     PROJECT_LOG_FILE="${PROJECT_LOG_DIR}/docker-container.log"
     mkdir -p ${PROJECT_LOG_DIR}
 
-    echo -n "Stopping (it can take up to 30 seconds)...  "
+    echo -n "Stopping ${2} (it can take up to 30 seconds) ... "
     sh -c "docker-compose -f ~/.wptunnel/projects/${2}/docker-compose.yml down > ${PROJECT_LOG_FILE} 2>&1"
 
     if [ $? -ne 0 ]; then
         echo -e "${RED}ERROR${NOCOLOR}"
         echo "See more at ${PROJECT_LOG_FILE}"
     else
-        echo -e "${GREEN}STOPPED${NOCOLOR}"
+        echo -e "${GREEN}done${NOCOLOR}"
     fi
     ;;
   eject)
