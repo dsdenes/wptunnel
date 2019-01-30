@@ -114,6 +114,7 @@ api_project_exists () {
 case "$1" in
   create)
     SUBDOMAIN="$2"
+    PROXY_NAME="$(tr -dc '[:alnum:]' < /dev/urandom  | dd bs=4 count=8 2>/dev/null)" || true
     assert_subdomain ${SUBDOMAIN}
     PROJECT_DIR="${HOME}/.wptunnel/projects/${SUBDOMAIN}"
     PROJECT_DATA_DIR="${HOME}/wptunnel/projects/${SUBDOMAIN}"
@@ -128,6 +129,7 @@ case "$1" in
 
     PROJECT_FRPC_INI="${PROJECT_DIR}/frp-docker/frpc.ini"
     sed -i "s/{SUBDOMAIN}/${SUBDOMAIN}/g" ${PROJECT_FRPC_INI}
+    sed -i "s/{PROXY_NAME}/${PROXY_NAME}/g" ${PROJECT_FRPC_INI}
     ;;
   run)
     assert_subdomain "$2"
