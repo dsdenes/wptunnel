@@ -12,10 +12,8 @@ curl -sL https://raw.githubusercontent.com/dsdenes/wptunnel/master/install.sh | 
 $ wptunnel create myproject
 $ wptunnel run myproject
 ```
-Open **https://myproject.wptunnel.com**
-
 ## Features
-- Uses Docker containers on your machine
+- Uses Docker containers to run projects on your machine
 - https:// support
 
 
