@@ -153,8 +153,9 @@ case "$1" in
 
     PROJECT_DIR="${HOME}/.wptunnel/projects/$2"
     PROJECT_LOG_DIR="${PROJECT_DIR}/log"
+    mkdir -p ${PROJECT_LOG_DIR}
     PROJECT_LOG_FILE="${PROJECT_LOG_DIR}/docker-container"
-    PROJECT_LOG_FILE="${PROJECT_LOG_FILE}_$(ls ${PROJECT_LOG_FILE}* | wc -l).log"
+    PROJECT_LOG_FILE="${PROJECT_LOG_FILE}_$(ls ${PROJECT_LOG_DIR} | wc -l).log"
     mkdir -p ${PROJECT_LOG_DIR}
     echo -n "Starting local WordPress installation proxy ... "
     sh -c "docker-compose -f ~/.wptunnel/projects/${SUBDOMAIN}/docker-compose.yml up -d > /dev/null 2>&1"
