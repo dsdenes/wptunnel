@@ -23,7 +23,7 @@ services:
     volumes:
       - {DATA_DIR}/wp-content:/var/www/html/wp-content:rw
     environment:
-      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_HOST: mysql:3306
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
       WP_URL: http://{SUBDOMAIN}.wptunnel.com
