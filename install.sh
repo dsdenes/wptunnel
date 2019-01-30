@@ -20,12 +20,20 @@ trap "handle_exit_code" EXIT
 
 handle_exit_code() {
   ERROR_CODE="$?";
+<<<<<<< HEAD
   if [ $ERROR_CODE -ne "0" ]; then
     echo -e "${RED}Failed to install.${NOCOLOR}"
-  else  
+  else
     echo -e "${GREEN}All done.${NOCOLOR}"
   fi
-  
+
+=======
+  if [ ERROR_CODE -eq 0 ]; then
+    echo -e "${GREEN}All done.${NOCOLOR}"
+  else
+    echo -e "${RED}Failed to install.${NOCOLOR}"
+  fi
+>>>>>>> :art: better install notifications
   exit ${ERROR_CODE};
 }
 
@@ -150,7 +158,7 @@ tar -xzf /tmp/wptunnel.tar.gz --strip 1 -C ~/.wptunnel
 chmod +x ~/.wptunnel/bin/wptunnel
 rm -rf /tmp/wptunnel.tar.gz
 
-if [ -f ~/.bash_profile ]; then 
+if [ -f ~/.bash_profile ]; then
   cp ~/.bash_profile ~/.bash_profile_$(ls ~/.bash_profile*.bak 2>/dev/null | wc -l).bak
   sed -i /wptunnel/d ~/.bash_profile
 fi
