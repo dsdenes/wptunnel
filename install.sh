@@ -20,20 +20,11 @@ trap "handle_exit_code" EXIT
 
 handle_exit_code() {
   ERROR_CODE="$?";
-<<<<<<< HEAD
-  if [ $ERROR_CODE -ne "0" ]; then
-    echo -e "${RED}Failed to install.${NOCOLOR}"
-  else
-    echo -e "${GREEN}All done.${NOCOLOR}"
-  fi
-
-=======
   if [ ERROR_CODE -eq 0 ]; then
     echo -e "${GREEN}All done.${NOCOLOR}"
   else
     echo -e "${RED}Failed to install.${NOCOLOR}"
   fi
->>>>>>> :art: better install notifications
   exit ${ERROR_CODE};
 }
 

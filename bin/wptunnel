@@ -113,7 +113,7 @@ api_project_exists () {
 case "$1" in
   create)
     SUBDOMAIN="$2"
-    PROXY_NAME="$(tr -dc '[:alnum:]' < /dev/urandom  | dd bs=4 count=8 2>/dev/null)" || true
+    PROXY_NAME="$(LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2>/dev/null | dd bs=4 count=8 2>/dev/null)" || true
     assert_subdomain ${SUBDOMAIN}
     echo -n "Creating local WordPress installation ${SUBDOMAIN} ... "
     PROJECT_DIR="${HOME}/.wptunnel/projects/${SUBDOMAIN}"
