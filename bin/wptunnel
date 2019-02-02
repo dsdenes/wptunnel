@@ -117,15 +117,15 @@ case "$1" in
     assert_subdomain ${SUBDOMAIN}
     echo -n "Creating local WordPress installation ${SUBDOMAIN} ... "
     PROJECT_DIR="${HOME}/.wptunnel/projects/${SUBDOMAIN}"
-    PROJECT_DATA_DIR="${HOME}/wptunnel/projects/${SUBDOMAIN}"
+    # PROJECT_DATA_DIR="${HOME}/wptunnel/projects/${SUBDOMAIN}"
     mkdir -p ${PROJECT_DIR}
-    mkdir -p ${PROJECT_DATA_DIR}
+    # mkdir -p ${PROJECT_DATA_DIR}
     cp -r ${HOME}/.wptunnel/docker/frp-docker ${PROJECT_DIR}
 
     PROJECT_DOCKER_COMPOSE="${PROJECT_DIR}/docker-compose.yml"
     cp ~/.wptunnel/template/docker-compose.yml ${PROJECT_DOCKER_COMPOSE}
     sed -i "s/{SUBDOMAIN}/${SUBDOMAIN}/g" ${PROJECT_DOCKER_COMPOSE}
-    sed -i "s|{DATA_DIR}|${PROJECT_DATA_DIR}|g" ${PROJECT_DOCKER_COMPOSE}
+    # sed -i "s|{DATA_DIR}|${PROJECT_DATA_DIR}|g" ${PROJECT_DOCKER_COMPOSE}
 
     PROJECT_FRPC_INI="${PROJECT_DIR}/frp-docker/frpc.ini"
     sed -i "s/{SUBDOMAIN}/${SUBDOMAIN}/g" ${PROJECT_FRPC_INI}
