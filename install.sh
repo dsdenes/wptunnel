@@ -149,11 +149,17 @@ chmod +x ~/.wptunnel/bin/wptunnel
 rm -rf /tmp/wptunnel.tar.gz
 
 if [ -d "$HOME/bin" ]; then
+  if [ -f "$HOME/bin/wptunnel" ]; then
+    rm ~/bin/wptunnel 2> /dev/null
+  fi
   ln -s $INSTALL_DIR/bin/wptunnel ~/bin
 fi
 
 if [ -d "$HOME/.local" ]; then
   mkdir -p $HOME/.local/bin
+  if [ -f "$HOME/.local/bin/wptunnel" ]; then
+    rm ~/.local/bin/wptunnel 2> /dev/null
+  fi
   ln -s $INSTALL_DIR/bin/wptunnel ~/.local/bin
 fi
 
