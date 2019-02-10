@@ -139,23 +139,31 @@ ensureDockerCompose
 
 mkdir -p ~/.wptunnel
 WPTUNNEL_VERSION=""
+INSTALL_DIR="$HOME/.wptunnel"
 if [[ "$OSTYPE" == "darwin"* ]]; then
   WPTUNNEL_VERSION=`git ls-remote https://github.com/dsdenes/wptunnel | grep refs/tags | grep -oE "[0-9]+\.[0-9]+\.[0-9]+$" | tail -n 1`
 else
   WPTUNNEL_VERSION=`git ls-remote https://github.com/dsdenes/wptunnel | grep refs/tags | grep -oP "[0-9]+\.[0-9]+\.[0-9]+$" | tail -n 1`
 fi
 downloadTo "https://github.com/dsdenes/wptunnel/archive/${WPTUNNEL_VERSION}.tar.gz" "/tmp/wptunnel.tar.gz"
-tar -xzf /tmp/wptunnel.tar.gz --strip 1 -C ~/.wptunnel
+tar -xzf /tmp/wptunnel.tar.gz --strip 1 -C $INSTALL_DIR
 chmod +x ~/.wptunnel/bin/wptunnel
 rm -rf /tmp/wptunnel.tar.gz
+
+if [ -d "$HOME/bin" ]; then
+  ln -s $INSTALL_DIR/bin/wptunnel ~/bin
+fi
+
+if [ -d "$HOME/.local/bin" ]; then
+  ln -s $INSTALL_DIR/bin/wptunnel ~/.local/bin
+fi
 
 if [ -f ~/.profile ]; then
   cp ~/.profile ~/.profile_$(ls ~/.profile*.bak 2>/dev/null | wc -l).bak
   sed -i /wptunnel/d ~/.profile
 fi
 
-echo "PATH=\"${HOME}/.wptunnel/bin:\$PATH\"" >> ~/.profile
-source ~/.profile
+echo "PATH=\"$HOME/.wptunnel/bin:\$PATH\"" >> ~/.profile
 
 printf -- '\n'
 exit 0
