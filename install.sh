@@ -19,13 +19,13 @@ ctrl_c() {
 trap "handle_exit_code" EXIT
 
 handle_exit_code() {
-  ERROR_CODE=$?;
-  if [ ERROR_CODE -eq 0 ]; then
+  ERROR_CODE="$?";
+  if [ ${ERROR_CODE} -eq "0" ]; then
     echo -e "${GREEN}All done.${NOCOLOR}"
   else
     echo -e "${RED}Failed to install.${NOCOLOR}"
   fi
-  exit ${ERROR_CODE};
+  exit $?;
 }
 
 error () {
