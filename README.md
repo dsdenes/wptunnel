@@ -4,7 +4,7 @@ Local WordPress development installation proxied to **yoursubdomain**.wptunnel.c
 
 [![asciicast](https://asciinema.org/a/224817.svg)](https://asciinema.org/a/224817)
 
-## Install (Linux and macOS)
+## Install (Linux, macOS and WSL)
 ```bash
 curl -sL https://raw.githubusercontent.com/dsdenes/wptunnel/master/install.sh | bash
 ```
