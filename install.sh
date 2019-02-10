@@ -154,7 +154,7 @@ if [ -f ~/.profile ]; then
   sed -i /wptunnel/d ~/.profile
 fi
 
-echo "export PATH=\$PATH:${HOME}/.wptunnel/bin" >> ~/.profile
+echo "PATH=\"${HOME}/.wptunnel/bin:\$PATH\"" >> ~/.profile
 source ~/.profile
 
 printf -- '\n'
