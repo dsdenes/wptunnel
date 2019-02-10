@@ -19,7 +19,7 @@ ctrl_c() {
 trap "handle_exit_code" EXIT
 
 handle_exit_code() {
-  ERROR_CODE="$?";
+  ERROR_CODE=$?;
   if [ ERROR_CODE -eq 0 ]; then
     echo -e "${GREEN}All done.${NOCOLOR}"
   else
