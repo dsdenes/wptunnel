@@ -20,9 +20,7 @@ trap "handle_exit_code" EXIT
 
 handle_exit_code() {
   ERROR_CODE="$?";
-  if [ ${ERROR_CODE} -eq "0" ]; then
-    echo -e "${GREEN}All done.${NOCOLOR}"
-  else
+  if ! [ ${ERROR_CODE} -eq "0" ]; then
     echo -e "${RED}Failed to install.${NOCOLOR}"
   fi
   exit $?;
@@ -159,12 +157,21 @@ if [ -d "$HOME/.local" ]; then
   ln -s $INSTALL_DIR/bin/wptunnel ~/.local/bin
 fi
 
-if [ -f ~/.profile ]; then
-  cp ~/.profile ~/.profile_$(ls ~/.profile*.bak 2>/dev/null | wc -l).bak
-  sed -i /wptunnel/d ~/.profile
+if [ -f ~/.bashrc ]; then
+  cp ~/.bashrc ~/.bashrc_$(ls ~/.bashrc*.bak 2>/dev/null | wc -l).bak
+  sed -i /wptunnel/d ~/.bashrc
 fi
 
-echo "PATH=\"$HOME/.wptunnel/bin:\$PATH\"" >> ~/.profile
+echo "PATH=\"\$HOME/.wptunnel/bin:\$PATH\"" >> ~/.bashrc
+
+if ! [ which wptunnel ]; then
+  echo -e "\nCongratulations, you are good to go now."
+  echo -e "Open a new terminal, and create your first project by running:\n"
+  echo -e "  $ wptunnel create mysite\n"
+else
+  echo -e "\nCongratulations, you are good to go now. You can create your first project by running:\n"
+  echo -e "  $ wptunnel create mysite\n"
+fi
 
 printf -- '\n'
 exit 0
