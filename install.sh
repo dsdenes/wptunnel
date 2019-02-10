@@ -170,14 +170,14 @@ fi
 
 echo "PATH=\"\$HOME/.wptunnel/bin:\$PATH\"" >> ~/.bashrc
 
-if ! [ which wptunnel ]; then
+if ! [ -x "$(command -v docker)" ]; then
   echo -e "\nCongratulations, you are good to go now."
   echo -e "Open a new terminal, and create your first project by running:\n"
-  echo -e "  $ wptunnel create mysite\n"
 else
   echo -e "\nCongratulations, you are good to go now. You can create your first project by running:\n"
-  echo -e "  $ wptunnel create mysite\n"
 fi
+echo -e "  $ wptunnel create mysite\n"
+echo -e "Change 'mysite' with your project name."
 
 printf -- '\n'
 exit 0
