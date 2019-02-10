@@ -149,13 +149,13 @@ tar -xzf /tmp/wptunnel.tar.gz --strip 1 -C ~/.wptunnel
 chmod +x ~/.wptunnel/bin/wptunnel
 rm -rf /tmp/wptunnel.tar.gz
 
-if [ -f ~/.bash_profile ]; then
-  cp ~/.bash_profile ~/.bash_profile_$(ls ~/.bash_profile*.bak 2>/dev/null | wc -l).bak
-  sed -i /wptunnel/d ~/.bash_profile
+if [ -f ~/.profile ]; then
+  cp ~/.profile ~/.profile_$(ls ~/.profile*.bak 2>/dev/null | wc -l).bak
+  sed -i /wptunnel/d ~/.profile
 fi
 
-echo "export PATH=\$PATH:$HOME/.wptunnel/bin" >> ~/.bash_profile
-source ~/.bash_profile
+echo "export PATH=\$PATH:${HOME}/.wptunnel/bin" >> ~/.profile
+source ~/.profile
 
 printf -- '\n'
 exit 0

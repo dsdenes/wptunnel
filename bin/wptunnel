@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+VERSION='1.0.1'
 GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
 RED='\033[1;31m'
@@ -56,7 +57,7 @@ while true; do
             exit 0
             ;;
         -v|--version)
-            echo $(cat ${BASH_SOURCE%/*}/../version)
+            echo ${VERSION}
             exit 0
             ;;
         --)
